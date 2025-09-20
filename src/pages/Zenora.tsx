@@ -13,10 +13,13 @@ import {
   MicOff, 
   Volume2, 
   VolumeX,
-  MessageCircle
+  MessageCircle,
+  Loader2
 } from 'lucide-react';
 import { useVoice } from '@/hooks/useVoice';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Message {
   id: string;
@@ -27,6 +30,7 @@ interface Message {
 
 export default function Zenora() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -79,13 +83,20 @@ export default function Zenora() {
     setIsLoading(true);
 
     try {
-      // Simulate AI response - in real app, this would call your AI service
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Call the AI chat edge function
+      const { data, error } = await supabase.functions.invoke('ai-chat', {
+        body: {
+          message: userMessage.content,
+          context: messages.slice(-5) // Send last 5 messages for context
+        }
+      });
+
+      if (error) throw error;
       
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: getZenoraResponse(userMessage.content),
+        content: data.response,
         timestamp: new Date()
       };
 
@@ -96,34 +107,21 @@ export default function Zenora() {
         speak(aiResponse.content);
       }
     } catch (error) {
+      console.error('Error getting AI response:', error);
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: "I'm having trouble connecting right now. Please try again in a moment. Remember, I'm here to support your mental wellness journey.",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorResponse]);
       toast.error('Sorry, I encountered an error. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getZenoraResponse = (userInput: string): string => {
-    // Simple response logic - in real app, this would be AI-powered
-    const input = userInput.toLowerCase();
-    
-    if (input.includes('sad') || input.includes('depressed') || input.includes('down')) {
-      return "I hear that you're feeling sad right now. It's completely okay to feel this way - emotions are a natural part of the human experience. Would you like to talk about what's contributing to these feelings, or would you prefer some gentle coping strategies that might help you feel a bit better?";
-    }
-    
-    if (input.includes('anxious') || input.includes('worried') || input.includes('stress')) {
-      return "Anxiety and worry can feel overwhelming. Remember that you're not alone in this, and what you're feeling is valid. Let's take a moment together - try taking a slow, deep breath. Would you like me to guide you through a brief breathing exercise, or would you prefer to talk about what's causing these anxious feelings?";
-    }
-    
-    if (input.includes('happy') || input.includes('good') || input.includes('great')) {
-      return "I'm so glad to hear you're feeling positive today! It's wonderful when we can acknowledge and celebrate the good moments. What's contributing to your happiness today? Recognizing these positive moments can help us build resilience for more challenging times.";
-    }
-    
-    if (input.includes('help') || input.includes('support')) {
-      return "I'm here to support you. Whether you need someone to listen, want to explore coping strategies, or just need a moment to process your thoughts, I'm here for you. What kind of support would feel most helpful right now?";
-    }
-    
-    return "Thank you for sharing that with me. I'm here to listen and support you. Your feelings and experiences matter. Would you like to tell me more about what's on your mind, or is there a particular area of your wellbeing you'd like to focus on today?";
-  };
+  // Remove the getZenoraResponse function as we're now using real AI
 
   const handleVoiceToggle = () => {
     if (isListening) {
@@ -274,7 +272,11 @@ export default function Zenora() {
                 disabled={isLoading || !input.trim()}
                 className="bg-gradient-primary hover:opacity-90 text-white shadow-glow"
               >
-                <Send className="w-4 h-4" />
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
               </Button>
             </div>
             

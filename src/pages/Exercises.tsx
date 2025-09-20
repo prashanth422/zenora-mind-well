@@ -4,6 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useState } from 'react';
 import { 
   Dumbbell, 
   Wind, 
@@ -12,7 +16,8 @@ import {
   Sparkles,
   Play,
   Clock,
-  Award
+  Award,
+  Loader2
 } from 'lucide-react';
 
 const exerciseCategories = [
@@ -60,6 +65,9 @@ const exerciseCategories = [
 
 export default function Exercises() {
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const [startingExercise, setStartingExercise] = useState<string | null>(null);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -70,9 +78,50 @@ export default function Exercises() {
     }
   };
 
-  const startExercise = (exerciseName: string) => {
-    // Here you would start the exercise
-    console.log('Starting exercise:', exerciseName);
+  const startExercise = async (exerciseName: string, duration: number, xp: number, category: string) => {
+    if (!user) {
+      toast({
+        title: "Please log in",
+        description: "You need to be logged in to start exercises.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setStartingExercise(exerciseName);
+    
+    try {
+      // Call the start-exercise edge function
+      const { data, error } = await supabase.functions.invoke('start-exercise', {
+        body: {
+          exerciseName,
+          duration,
+          xp,
+          userId: user.id,
+          category
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Exercise Started! 🧘‍♀️",
+        description: `${exerciseName} session is now active. Take your time and breathe deeply.`,
+      });
+
+      // Here you could navigate to an exercise session page or start a timer
+      console.log('Exercise started successfully:', data);
+      
+    } catch (error) {
+      console.error('Error starting exercise:', error);
+      toast({
+        title: "Could not start exercise",
+        description: "There was an issue starting your exercise. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setStartingExercise(null);
+    }
   };
 
   return (
@@ -173,11 +222,16 @@ export default function Exercises() {
                         </div>
 
                         <Button
-                          onClick={() => startExercise(exercise.name)}
+                          onClick={() => startExercise(exercise.name, exercise.duration, exercise.xp, category.key)}
+                          disabled={startingExercise === exercise.name}
                           className={`w-full ${category.gradient} text-white hover:opacity-90 shadow-soft`}
                         >
-                          <Play className="w-4 h-4 mr-2" />
-                          Start Exercise
+                          {startingExercise === exercise.name ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Play className="w-4 h-4 mr-2" />
+                          )}
+                          {startingExercise === exercise.name ? 'Starting...' : 'Start Exercise'}
                         </Button>
                       </div>
                     </motion.div>

@@ -114,6 +114,48 @@ export type Database = {
           },
         ]
       }
+      exercise_sessions: {
+        Row: {
+          category: string
+          completed_at: string | null
+          created_at: string
+          duration_minutes: number
+          exercise_name: string
+          id: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+          xp_earned: number
+        }
+        Insert: {
+          category?: string
+          completed_at?: string | null
+          created_at?: string
+          duration_minutes?: number
+          exercise_name: string
+          id?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          xp_earned?: number
+        }
+        Update: {
+          category?: string
+          completed_at?: string | null
+          created_at?: string
+          duration_minutes?: number
+          exercise_name?: string
+          id?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          xp_earned?: number
+        }
+        Relationships: []
+      }
       exercises: {
         Row: {
           category: string | null
