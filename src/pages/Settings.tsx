@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,12 +18,14 @@ import {
   Monitor,
   User,
   Shield,
-  HelpCircle
+  HelpCircle,
+  Heart
 } from 'lucide-react';
 
 export default function Settings() {
   const { t, i18n } = useTranslation();
   const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState(true);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [speechRate, setSpeechRate] = useState([1.0]);
@@ -265,6 +268,14 @@ export default function Settings() {
               <Button variant="outline" className="w-full justify-start">
                 <User className="w-4 h-4 mr-2" />
                 Terms of Service
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start text-primary"
+                onClick={() => navigate('/wellness-resources')}
+              >
+                <Heart className="w-4 h-4 mr-2" />
+                Wellness Resources
               </Button>
               
               <div className="pt-4 border-t border-border/20">

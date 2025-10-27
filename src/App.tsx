@@ -14,6 +14,7 @@ import Rewards from "@/pages/Rewards";
 import Insights from "@/pages/Insights";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
+import WellnessResources from "@/pages/WellnessResources";
 import "@/i18n";
 import { useEffect } from "react";
 
@@ -60,6 +61,7 @@ function AppRoutes() {
         <Route path="/rewards" element={<Rewards />} />
         <Route path="/insights" element={<Insights />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/wellness-resources" element={<WellnessResources />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
