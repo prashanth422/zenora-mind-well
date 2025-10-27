@@ -15,7 +15,7 @@ import {
   Star,
   Gift,
   BarChart3,
-  Settings as SettingsIcon
+  Phone
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -58,9 +58,9 @@ export default function Dashboard() {
       gradient: 'bg-gradient-energy'
     },
     { 
-      key: 'settings', 
-      icon: SettingsIcon, 
-      path: '/settings',
+      key: 'wellnessResources', 
+      icon: Phone, 
+      path: '/wellness-resources',
       gradient: 'bg-gradient-primary'
     },
   ];
