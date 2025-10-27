@@ -50,9 +50,10 @@
   "exercises": {
     "title": "ఆరోగ్య వ్యాయామాలు",
     "breathing": "శ్వాసక్రియ",
-    "meditation": "ధ్యానం",
-    "mindfulness": "మైండ్‌ఫుల్‌నెస్",
-    "gratitude": "కృతజ్ఞత"
+    "grounding": "గ్రౌండింగ్",
+    "movement": "కదలిక",
+    "gratitude": "కృతజ్ఞత",
+    "sleep": "నిద్ర తయారీ"
   },
   "moods": {
     "great": "అద్భుతం",

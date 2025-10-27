@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
+import { useTheme } from '@/hooks/useTheme';
 import { 
   Settings as SettingsIcon, 
   Globe, 
@@ -21,10 +22,10 @@ import {
 
 export default function Settings() {
   const { t, i18n } = useTranslation();
+  const { theme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [speechRate, setSpeechRate] = useState([1.0]);
-  const [theme, setTheme] = useState('system');
 
   const handleLanguageChange = (language: string) => {
     i18n.changeLanguage(language);
@@ -159,7 +160,7 @@ export default function Settings() {
                       key={themeOption.value}
                       variant={theme === themeOption.value ? "default" : "outline"}
                       size="sm"
-                      onClick={() => setTheme(themeOption.value)}
+                      onClick={() => setTheme(themeOption.value as 'light' | 'dark' | 'system')}
                       className="flex items-center space-x-2"
                     >
                       <themeOption.icon className="w-4 h-4" />

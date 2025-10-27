@@ -25,40 +25,145 @@ const exerciseCategories = [
     key: 'breathing',
     icon: Wind,
     gradient: 'bg-gradient-calm',
+    description: 'WHO-recommended breathing exercises to reduce stress and anxiety',
     exercises: [
-      { name: 'Box Breathing', duration: 5, xp: 15, difficulty: 'Beginner' },
-      { name: '4-7-8 Breathing', duration: 8, xp: 20, difficulty: 'Intermediate' },
-      { name: 'Alternate Nostril', duration: 10, xp: 25, difficulty: 'Advanced' }
+      { 
+        name: 'Deep Breathing (4-7-8)', 
+        duration: 5, 
+        xp: 15, 
+        difficulty: 'Beginner',
+        description: 'Breathe in for 4, hold for 7, exhale for 8 seconds'
+      },
+      { 
+        name: 'Box Breathing', 
+        duration: 8, 
+        xp: 20, 
+        difficulty: 'Beginner',
+        description: 'Square breathing: 4 counts each for inhale, hold, exhale, hold'
+      },
+      { 
+        name: 'Alternate Nostril', 
+        duration: 10, 
+        xp: 25, 
+        difficulty: 'Advanced',
+        description: 'Calm the nervous system with balanced nostril breathing'
+      }
     ]
   },
   {
-    key: 'meditation',
+    key: 'grounding',
     icon: Brain,
     gradient: 'bg-gradient-focus',
+    description: 'Sensory awareness exercises to anchor yourself in the present',
     exercises: [
-      { name: 'Body Scan', duration: 15, xp: 30, difficulty: 'Beginner' },
-      { name: 'Loving Kindness', duration: 20, xp: 40, difficulty: 'Intermediate' },
-      { name: 'Mindful Walking', duration: 25, xp: 50, difficulty: 'Advanced' }
+      { 
+        name: '5-4-3-2-1 Grounding', 
+        duration: 5, 
+        xp: 15, 
+        difficulty: 'Beginner',
+        description: '5 things you see, 4 you hear, 3 you touch, 2 you smell, 1 you taste'
+      },
+      { 
+        name: 'Body Scan', 
+        duration: 15, 
+        xp: 30, 
+        difficulty: 'Beginner',
+        description: 'Systematically focus on each body part to release tension'
+      },
+      { 
+        name: 'Present Moment Awareness', 
+        duration: 10, 
+        xp: 20, 
+        difficulty: 'Intermediate',
+        description: 'Notice your surroundings without judgment'
+      }
     ]
   },
   {
-    key: 'mindfulness',
-    icon: Sparkles,
+    key: 'movement',
+    icon: Dumbbell,
     gradient: 'bg-gradient-primary',
+    description: 'Light physical activities to boost mood and energy',
     exercises: [
-      { name: '5-4-3-2-1 Grounding', duration: 5, xp: 15, difficulty: 'Beginner' },
-      { name: 'Mindful Eating', duration: 15, xp: 25, difficulty: 'Intermediate' },
-      { name: 'Present Moment Awareness', duration: 10, xp: 20, difficulty: 'Intermediate' }
+      { 
+        name: 'Stretch Break', 
+        duration: 5, 
+        xp: 10, 
+        difficulty: 'Beginner',
+        description: 'Simple stretches to release physical tension'
+      },
+      { 
+        name: 'Mindful Walking', 
+        duration: 15, 
+        xp: 25, 
+        difficulty: 'Beginner',
+        description: 'Walk slowly, focusing on each step and breath'
+      },
+      { 
+        name: 'Progressive Muscle Relaxation', 
+        duration: 20, 
+        xp: 35, 
+        difficulty: 'Intermediate',
+        description: 'Tense and release muscle groups systematically'
+      }
     ]
   },
   {
     key: 'gratitude',
     icon: Heart,
     gradient: 'bg-gradient-energy',
+    description: 'Cultivate positive emotions through gratitude practice',
     exercises: [
-      { name: 'Three Good Things', duration: 5, xp: 10, difficulty: 'Beginner' },
-      { name: 'Gratitude Letter', duration: 15, xp: 30, difficulty: 'Intermediate' },
-      { name: 'Appreciation Meditation', duration: 12, xp: 25, difficulty: 'Intermediate' }
+      { 
+        name: 'Gratitude Journal', 
+        duration: 5, 
+        xp: 10, 
+        difficulty: 'Beginner',
+        description: 'Write 3 things you\'re grateful for today'
+      },
+      { 
+        name: 'Gratitude Letter', 
+        duration: 15, 
+        xp: 30, 
+        difficulty: 'Intermediate',
+        description: 'Write to someone who made a difference in your life'
+      },
+      { 
+        name: 'Loving Kindness Meditation', 
+        duration: 12, 
+        xp: 25, 
+        difficulty: 'Intermediate',
+        description: 'Send wishes of wellbeing to yourself and others'
+      }
+    ]
+  },
+  {
+    key: 'sleep',
+    icon: Sparkles,
+    gradient: 'bg-gradient-calm',
+    description: 'WHO sleep hygiene practices for better rest',
+    exercises: [
+      { 
+        name: 'Sleep Prep Routine', 
+        duration: 10, 
+        xp: 20, 
+        difficulty: 'Beginner',
+        description: 'Screen-off time, dim lights, and relaxation'
+      },
+      { 
+        name: 'Body Relaxation for Sleep', 
+        duration: 15, 
+        xp: 25, 
+        difficulty: 'Beginner',
+        description: 'Progressive relaxation to prepare for sleep'
+      },
+      { 
+        name: 'Sleep Meditation', 
+        duration: 20, 
+        xp: 30, 
+        difficulty: 'Intermediate',
+        description: 'Guided meditation to calm the mind before bed'
+      }
     ]
   }
 ];
@@ -180,11 +285,14 @@ export default function Exercises() {
           >
             <Card className="glass">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-3">
-                  <div className={`w-10 h-10 ${category.gradient} rounded-lg flex items-center justify-center`}>
-                    <category.icon className="w-5 h-5 text-white" />
+                <CardTitle className="space-y-2">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-10 h-10 ${category.gradient} rounded-lg flex items-center justify-center`}>
+                      <category.icon className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="capitalize">{t(`exercises.${category.key}`)}</span>
                   </div>
-                  <span className="capitalize">{t(`exercises.${category.key}`)}</span>
+                  <p className="text-sm font-normal text-muted-foreground">{category.description}</p>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -200,7 +308,8 @@ export default function Exercises() {
                       <div className="space-y-3">
                         <div>
                           <h3 className="font-medium text-foreground">{exercise.name}</h3>
-                          <div className="flex items-center space-x-2 mt-1">
+                          <p className="text-xs text-muted-foreground mt-1">{exercise.description}</p>
+                          <div className="flex items-center space-x-2 mt-2">
                             <Badge 
                               variant="outline" 
                               className={`text-xs ${getDifficultyColor(exercise.difficulty)}`}

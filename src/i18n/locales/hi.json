@@ -50,9 +50,10 @@
   "exercises": {
     "title": "कल्याण व्यायाम",
     "breathing": "सांस लेना",
-    "meditation": "ध्यान",
-    "mindfulness": "माइंडफुलनेस",
-    "gratitude": "कृतज्ञता"
+    "grounding": "ग्राउंडिंग",
+    "movement": "गति",
+    "gratitude": "कृतज्ञता",
+    "sleep": "नींद तैयारी"
   },
   "moods": {
     "great": "बहुत अच्छा",

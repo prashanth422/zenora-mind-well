@@ -50,9 +50,10 @@
   "exercises": {
     "title": "Wellness Exercises",
     "breathing": "Breathing",
-    "meditation": "Meditation",
-    "mindfulness": "Mindfulness",
-    "gratitude": "Gratitude"
+    "grounding": "Grounding",
+    "movement": "Movement",
+    "gratitude": "Gratitude",
+    "sleep": "Sleep Prep"
   },
   "moods": {
     "great": "Great",

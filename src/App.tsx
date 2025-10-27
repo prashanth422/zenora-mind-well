@@ -15,11 +15,25 @@ import Insights from "@/pages/Insights";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
 import "@/i18n";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
 function AppRoutes() {
   const { user, loading } = useAuth();
+
+  // Initialize theme on mount
+  useEffect(() => {
+    const storedTheme = localStorage.getItem('zenora-theme') || 'dark';
+    const root = document.documentElement;
+    
+    if (storedTheme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.classList.add(systemTheme);
+    } else {
+      root.classList.add(storedTheme);
+    }
+  }, []);
 
   if (loading) {
     return (

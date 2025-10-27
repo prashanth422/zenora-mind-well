@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,13 +12,17 @@ import {
   Brain, 
   Dumbbell,
   Smile,
-  Star
+  Star,
+  Gift,
+  BarChart3,
+  Settings as SettingsIcon
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function Dashboard() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const userName = user?.user_metadata?.full_name?.split(' ')[0] || 'Friend';
 
@@ -39,6 +44,24 @@ export default function Dashboard() {
       icon: Dumbbell, 
       path: '/exercises',
       gradient: 'bg-gradient-focus'
+    },
+    { 
+      key: 'rewards', 
+      icon: Gift, 
+      path: '/rewards',
+      gradient: 'bg-gradient-calm'
+    },
+    { 
+      key: 'insights', 
+      icon: BarChart3, 
+      path: '/insights',
+      gradient: 'bg-gradient-energy'
+    },
+    { 
+      key: 'settings', 
+      icon: SettingsIcon, 
+      path: '/settings',
+      gradient: 'bg-gradient-primary'
     },
   ];
 
@@ -176,7 +199,7 @@ export default function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {quickActions.map((action, index) => (
                 <motion.div
                   key={action.key}
@@ -187,7 +210,7 @@ export default function Dashboard() {
                   <Button
                     variant="outline"
                     className={`w-full h-24 ${action.gradient} text-white border-none shadow-medium hover:shadow-strong transition-all duration-300`}
-                    onClick={() => window.location.href = action.path}
+                    onClick={() => navigate(action.path)}
                   >
                     <div className="flex flex-col items-center space-y-2">
                       <action.icon className="w-8 h-8" />
