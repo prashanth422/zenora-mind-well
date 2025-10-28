@@ -69,7 +69,7 @@ export default function Zenora() {
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -83,16 +83,24 @@ export default function Zenora() {
     setIsLoading(true);
 
     try {
-      // Call the AI chat edge function
       const { data, error } = await supabase.functions.invoke('ai-chat', {
         body: {
           message: userMessage.content,
-          context: messages.slice(-5) // Send last 5 messages for context
+          userId: user?.id,
+          context: messages.slice(-5).map(m => ({ role: m.role, content: m.content }))
         }
       });
 
       if (error) throw error;
-      
+
+      // Handle crisis detection
+      if (data.isCrisis) {
+        toast.error("⚠️ Crisis Support Available", {
+          description: "Please reach out to a helpline immediately. You're not alone.",
+          duration: 10000,
+        });
+      }
+
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -101,7 +109,15 @@ export default function Zenora() {
       };
 
       setMessages(prev => [...prev, aiResponse]);
-      
+
+      // Show emotion insight
+      if (data.emotionAnalysis && data.emotionAnalysis.intensity >= 7) {
+        toast("💚 I'm here for you", {
+          description: `I sense you're feeling ${data.emotionAnalysis.emotions.join(', ')}. Take your time.`,
+          duration: 5000,
+        });
+      }
+
       // Auto-speak the response if TTS is available
       if ('speechSynthesis' in window) {
         speak(aiResponse.content);
@@ -111,7 +127,7 @@ export default function Zenora() {
       const errorResponse: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: "I'm having trouble connecting right now. Please try again in a moment. Remember, I'm here to support your mental wellness journey.",
+        content: "I'm having trouble connecting right now. Please try again in a moment.",
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorResponse]);
