@@ -60,6 +60,28 @@ serve(async (req) => {
       }),
     });
 
+    if (!sentimentResponse.ok) {
+      if (sentimentResponse.status === 429) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Rate limit exceeded. Please try again in a moment.',
+            response: "I'm experiencing high demand right now. Please try again in a moment."
+          }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if (sentimentResponse.status === 402) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Service temporarily unavailable.',
+            response: "I'm temporarily unavailable. Please try again later."
+          }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      console.error('Sentiment API error:', sentimentResponse.status, await sentimentResponse.text());
+    }
+
     const sentimentData = await sentimentResponse.json();
     let emotionAnalysis;
     try {
@@ -93,10 +115,11 @@ CRITICAL RESPONSE PROTOCOL:
 5. Encourage them to reach out to someone they trust
 6. Remind them this feeling is temporary and help is available
 
-Be warm, direct, and focused on immediate safety.`
+Be warm, direct, and focused on immediate safety. Respond in the same language the user is using.`
       : `You are Zenora, a compassionate AI mental wellness companion for Indian users.
 
 Guidelines:
+- Respond in the SAME LANGUAGE the user is using (English, Hindi, Telugu, or any other language)
 - Be empathetic, warm, and culturally sensitive to Indian context
 - Use simple, accessible language (avoid jargon)
 - Acknowledge emotions before offering solutions
@@ -127,6 +150,30 @@ Respond with empathy appropriate to their emotional state.`;
         temperature: 0.7,
       }),
     });
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Rate limit exceeded. Please try again in a moment.',
+            response: "I'm experiencing high demand right now. Please try again in a moment."
+          }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Service temporarily unavailable.',
+            response: "I'm temporarily unavailable. Please try again later."
+          }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      const errorText = await response.text();
+      console.error('AI API error:', response.status, errorText);
+      throw new Error(`AI API error: ${response.status}`);
+    }
 
     const data = await response.json();
     const reply = data.choices[0].message.content;
