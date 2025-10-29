@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +19,7 @@ import {
   Award,
   Loader2
 } from 'lucide-react';
+import BoxBreathing from '@/components/exercises/BoxBreathing';
 
 const exerciseCategories = [
   {
@@ -173,6 +174,7 @@ export default function Exercises() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [startingExercise, setStartingExercise] = useState<string | null>(null);
+  const [showBoxBreathing, setShowBoxBreathing] = useState(false);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -190,6 +192,12 @@ export default function Exercises() {
         description: "You need to be logged in to start exercises.",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Special handling for Box Breathing
+    if (exerciseName === 'Box Breathing') {
+      setShowBoxBreathing(true);
       return;
     }
 
@@ -214,7 +222,6 @@ export default function Exercises() {
         description: `${exerciseName} session is now active. Take your time and breathe deeply.`,
       });
 
-      // Here you could navigate to an exercise session page or start a timer
       console.log('Exercise started successfully:', data);
       
     } catch (error) {
@@ -229,8 +236,46 @@ export default function Exercises() {
     }
   };
 
+  const handleBoxBreathingComplete = async () => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase.functions.invoke('start-exercise', {
+        body: {
+          exerciseName: 'Box Breathing',
+          duration: 8,
+          xp: 20,
+          userId: user.id,
+          category: 'breathing'
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Exercise Completed! 🎉",
+        description: "Great work! You've earned 20 XP for completing Box Breathing.",
+      });
+    } catch (error) {
+      console.error('Error completing exercise:', error);
+    }
+  };
+
   return (
-    <div className="h-full overflow-y-auto p-6 space-y-6">
+    <>
+      <AnimatePresence>
+        {showBoxBreathing && (
+          <BoxBreathing
+            onClose={() => setShowBoxBreathing(false)}
+            onComplete={() => {
+              setShowBoxBreathing(false);
+              handleBoxBreathingComplete();
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <div className="h-full overflow-y-auto p-6 space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -401,6 +446,7 @@ export default function Exercises() {
           </CardContent>
         </Card>
       </motion.div>
-    </div>
+      </div>
+    </>
   );
 }
