@@ -118,10 +118,12 @@ export default function Zenora() {
         });
       }
 
-      // Auto-speak the response if TTS is available
-      if ('speechSynthesis' in window) {
-        speak(aiResponse.content);
-      }
+      // Auto-speak the response if TTS is enabled
+      setTimeout(() => {
+        if ('speechSynthesis' in window) {
+          speak(aiResponse.content);
+        }
+      }, 300);
     } catch (error) {
       console.error('Error getting AI response:', error);
       const errorResponse: Message = {

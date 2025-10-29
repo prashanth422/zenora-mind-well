@@ -48,13 +48,8 @@ export function useVoice() {
       recognition.continuous = false;
       recognition.interimResults = true;
       
-      // Set language based on current i18n language
-      const langMap = {
-        en: 'en-US',
-        hi: 'hi-IN',
-        te: 'te-IN'
-      };
-      recognition.lang = langMap[i18n.language as keyof typeof langMap] || 'en-US';
+      // Set language to English by default
+      recognition.lang = 'en-US';
 
       recognition.onstart = () => {
         setIsListening(true);
@@ -109,29 +104,43 @@ export function useVoice() {
       
       const utterance = new SpeechSynthesisUtterance(text);
       
-      // Set voice based on current language
-      const voices = window.speechSynthesis.getVoices();
-      const langMap = {
-        en: 'en',
-        hi: 'hi',
-        te: 'te'
+      // Function to set voice once voices are loaded
+      const setVoice = () => {
+        const voices = window.speechSynthesis.getVoices();
+        
+        // Default to English voice
+        const englishVoice = voices.find(v => v.lang.startsWith('en'));
+        
+        if (englishVoice) {
+          utterance.voice = englishVoice;
+        }
+        
+        utterance.lang = 'en-US'; // Set language to English
+        utterance.rate = rate;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+        utterance.onstart = () => setIsSpeaking(true);
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = (e) => {
+          console.error('Speech synthesis error:', e);
+          setIsSpeaking(false);
+        };
+        
+        window.speechSynthesis.speak(utterance);
       };
       
-      const targetLang = langMap[i18n.language as keyof typeof langMap] || 'en';
-      const voice = voices.find(v => v.lang.startsWith(targetLang));
-      
-      if (voice) {
-        utterance.voice = voice;
+      // Check if voices are already loaded
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        setVoice();
+      } else {
+        // Wait for voices to load
+        window.speechSynthesis.onvoiceschanged = () => {
+          setVoice();
+        };
       }
-      
-      utterance.rate = rate;
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      
-      window.speechSynthesis.speak(utterance);
     }
-  }, [i18n.language]);
+  }, []);
 
   const stopSpeaking = useCallback(() => {
     if ('speechSynthesis' in window) {
