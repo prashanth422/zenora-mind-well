@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { X, Play, Pause, CheckCircle, Clock } from 'lucide-react';
+import { X, Play, Pause, CheckCircle, Clock, Volume2, VolumeX } from 'lucide-react';
+import { useVoice } from '@/hooks/useVoice';
 
 interface GuidedExerciseProps {
   exerciseName: string;
@@ -28,6 +29,8 @@ export default function GuidedExercise({
   const [timeLeft, setTimeLeft] = useState(duration * 60); // convert to seconds
   const [currentStep, setCurrentStep] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const { speak, stopSpeaking, isSpeaking } = useVoice();
 
   const totalSeconds = duration * 60;
   const progress = ((totalSeconds - timeLeft) / totalSeconds) * 100;
@@ -52,11 +55,22 @@ export default function GuidedExercise({
     if (instructions.length > 0 && isActive && !isCompleted) {
       const stepDuration = totalSeconds / instructions.length;
       const newStep = Math.floor((totalSeconds - timeLeft) / stepDuration);
-      if (newStep < instructions.length) {
+      if (newStep < instructions.length && newStep !== currentStep) {
         setCurrentStep(newStep);
+        // Speak the new instruction
+        if (voiceEnabled && instructions[newStep]) {
+          speak(instructions[newStep], 0.9);
+        }
       }
     }
-  }, [timeLeft, instructions.length, isActive, totalSeconds, isCompleted]);
+  }, [timeLeft, instructions.length, isActive, totalSeconds, isCompleted, currentStep, voiceEnabled, speak, instructions]);
+
+  // Cleanup voice on unmount or pause
+  useEffect(() => {
+    if (!isActive || isCompleted) {
+      stopSpeaking();
+    }
+  }, [isActive, isCompleted, stopSpeaking]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -99,15 +113,29 @@ export default function GuidedExercise({
             {/* Background gradient */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 opacity-50" />
             
-            {/* Close button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-4 right-4 z-10"
-              onClick={onClose}
-            >
-              <X className="w-5 h-5" />
-            </Button>
+            {/* Control buttons */}
+            <div className="absolute top-4 right-4 z-10 flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setVoiceEnabled(!voiceEnabled);
+                  if (!voiceEnabled) {
+                    stopSpeaking();
+                  }
+                }}
+                title={voiceEnabled ? "Mute voice" : "Enable voice"}
+              >
+                {voiceEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
 
             {/* Content */}
             <div className="relative space-y-6">
@@ -120,6 +148,39 @@ export default function GuidedExercise({
                   <span>{duration} minutes</span>
                 </div>
               </div>
+
+              {/* Animated Avatar */}
+              {!isCompleted && (
+                <div className="flex justify-center my-6">
+                  <motion.div
+                    className="relative w-32 h-32 rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center"
+                    animate={isActive ? {
+                      scale: [1, 1.2, 1],
+                    } : {}}
+                    transition={{
+                      duration: 4,
+                      repeat: isActive ? Infinity : 0,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    <motion.div
+                      className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary opacity-60"
+                      animate={isActive ? {
+                        scale: [1, 1.3, 1],
+                        opacity: [0.6, 0.8, 0.6]
+                      } : {}}
+                      transition={{
+                        duration: 4,
+                        repeat: isActive ? Infinity : 0,
+                        ease: "easeInOut"
+                      }}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-4xl">🧘</div>
+                    </div>
+                  </motion.div>
+                </div>
+              )}
 
               {/* Timer */}
               {!isCompleted && (
