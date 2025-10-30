@@ -20,6 +20,8 @@ import {
   Loader2
 } from 'lucide-react';
 import BoxBreathing from '@/components/exercises/BoxBreathing';
+import GuidedExercise from '@/components/exercises/GuidedExercise';
+import { exerciseInstructions } from '@/data/exerciseInstructions';
 
 const exerciseCategories = [
   {
@@ -175,6 +177,13 @@ export default function Exercises() {
   const { user } = useAuth();
   const [startingExercise, setStartingExercise] = useState<string | null>(null);
   const [showBoxBreathing, setShowBoxBreathing] = useState(false);
+  const [activeExercise, setActiveExercise] = useState<{
+    name: string;
+    description: string;
+    duration: number;
+    xp: number;
+    category: string;
+  } | null>(null);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -201,11 +210,27 @@ export default function Exercises() {
       return;
     }
 
-    setStartingExercise(exerciseName);
-    
+    // For all other exercises, show the guided exercise component
+    const exerciseData = exerciseCategories
+      .flatMap(cat => cat.exercises)
+      .find(ex => ex.name === exerciseName);
+
+    if (exerciseData) {
+      setActiveExercise({
+        name: exerciseName,
+        description: exerciseData.description,
+        duration,
+        xp,
+        category
+      });
+    }
+  };
+
+  const handleExerciseComplete = async (exerciseName: string, duration: number, xp: number, category: string) => {
+    if (!user) return;
+
     try {
-      // Call the start-exercise edge function
-      const { data, error } = await supabase.functions.invoke('start-exercise', {
+      const { error } = await supabase.functions.invoke('start-exercise', {
         body: {
           exerciseName,
           duration,
@@ -218,46 +243,16 @@ export default function Exercises() {
       if (error) throw error;
 
       toast({
-        title: "Exercise Started! 🧘‍♀️",
-        description: `${exerciseName} session is now active. Take your time and breathe deeply.`,
-      });
-
-      console.log('Exercise started successfully:', data);
-      
-    } catch (error) {
-      console.error('Error starting exercise:', error);
-      toast({
-        title: "Could not start exercise",
-        description: "There was an issue starting your exercise. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setStartingExercise(null);
-    }
-  };
-
-  const handleBoxBreathingComplete = async () => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase.functions.invoke('start-exercise', {
-        body: {
-          exerciseName: 'Box Breathing',
-          duration: 8,
-          xp: 20,
-          userId: user.id,
-          category: 'breathing'
-        }
-      });
-
-      if (error) throw error;
-
-      toast({
         title: "Exercise Completed! 🎉",
-        description: "Great work! You've earned 20 XP for completing Box Breathing.",
+        description: `Great work! You've earned ${xp} XP for completing ${exerciseName}.`,
       });
     } catch (error) {
       console.error('Error completing exercise:', error);
+      toast({
+        title: "Error",
+        description: "Could not record exercise completion. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -269,7 +264,27 @@ export default function Exercises() {
             onClose={() => setShowBoxBreathing(false)}
             onComplete={() => {
               setShowBoxBreathing(false);
-              handleBoxBreathingComplete();
+              handleExerciseComplete('Box Breathing', 8, 20, 'breathing');
+            }}
+          />
+        )}
+        
+        {activeExercise && (
+          <GuidedExercise
+            exerciseName={activeExercise.name}
+            description={activeExercise.description}
+            duration={activeExercise.duration}
+            category={activeExercise.category}
+            instructions={exerciseInstructions[activeExercise.name] || []}
+            onClose={() => setActiveExercise(null)}
+            onComplete={() => {
+              handleExerciseComplete(
+                activeExercise.name,
+                activeExercise.duration,
+                activeExercise.xp,
+                activeExercise.category
+              );
+              setActiveExercise(null);
             }}
           />
         )}
