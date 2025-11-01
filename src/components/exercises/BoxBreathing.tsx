@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Play, Pause, X } from 'lucide-react';
+import { useAIVoice } from '@/hooks/useAIVoice';
 
 interface BoxBreathingProps {
   onClose: () => void;
@@ -32,33 +33,7 @@ export default function BoxBreathing({ onClose, onComplete }: BoxBreathingProps)
   const [showMotivation, setShowMotivation] = useState(false);
   const [currentQuote, setCurrentQuote] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
-
-  const speak = (text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      utteranceRef.current = new SpeechSynthesisUtterance(text);
-      utteranceRef.current.rate = 0.9;
-      utteranceRef.current.pitch = 1.0;
-      utteranceRef.current.volume = 0.8;
-      
-      const setVoice = () => {
-        const voices = window.speechSynthesis.getVoices();
-        const englishVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Female'));
-        if (englishVoice) {
-          utteranceRef.current!.voice = englishVoice;
-        }
-        window.speechSynthesis.speak(utteranceRef.current!);
-      };
-
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length > 0) {
-        setVoice();
-      } else {
-        window.speechSynthesis.onvoiceschanged = setVoice;
-      }
-    }
-  };
+  const { speak, stopSpeaking } = useAIVoice();
 
   useEffect(() => {
     if (isActive) {
@@ -98,7 +73,7 @@ export default function BoxBreathing({ onClose, onComplete }: BoxBreathingProps)
 
   const toggleActive = () => {
     if (isActive) {
-      window.speechSynthesis.cancel();
+      stopSpeaking();
     } else {
       speak("Let's begin. Find a comfortable position and relax.");
     }
@@ -107,7 +82,7 @@ export default function BoxBreathing({ onClose, onComplete }: BoxBreathingProps)
 
   const handleClose = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
-    window.speechSynthesis.cancel();
+    stopSpeaking();
     onClose();
   };
 

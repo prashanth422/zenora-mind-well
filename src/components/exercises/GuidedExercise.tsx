@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { X, Play, Pause, CheckCircle, Clock, Volume2, VolumeX } from 'lucide-react';
-import { useVoice } from '@/hooks/useVoice';
+import { useAIVoice } from '@/hooks/useAIVoice';
 
 interface GuidedExerciseProps {
   exerciseName: string;
@@ -30,7 +30,7 @@ export default function GuidedExercise({
   const [currentStep, setCurrentStep] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const { speak, stopSpeaking, isSpeaking } = useVoice();
+  const { speak, stopSpeaking, isSpeaking } = useAIVoice();
 
   const totalSeconds = duration * 60;
   const progress = ((totalSeconds - timeLeft) / totalSeconds) * 100;
@@ -59,7 +59,7 @@ export default function GuidedExercise({
         setCurrentStep(newStep);
         // Speak the new instruction
         if (voiceEnabled && instructions[newStep]) {
-          speak(instructions[newStep], 0.9);
+          speak(instructions[newStep]);
         }
       }
     }
